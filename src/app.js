@@ -7,20 +7,22 @@ const { NODE_ENV } = require('./config')
 const usersRouter = require('../src/users/users-router')
 const purchasesRouter = require('../src/purchases/purchases-router')
 const budgetsRouter = require('../src/budgets/budgets-router')
+const authRouter = require('../src/auth/auth-router')
 
 const app = express()
 
-const morganOption = (NODE_ENV === 'production')
-? 'tiny'
-: 'common';
+app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
+    skip: () => NODE_ENV === 'test',
+}))
 
-app.use(morgan(morganOption))
+
 app.use(helmet())
 app.use(cors())
 
 app.use('/api/users', usersRouter)
 app.use('/api/purchases', purchasesRouter)
 app.use('/api/budgets', budgetsRouter)
+app.use('/api/auth', authRouter)
 
 app.get('/', (req, res) => {
     res.send('Hello, world!')

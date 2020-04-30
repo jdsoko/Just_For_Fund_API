@@ -1,6 +1,7 @@
 const express = require('express')
 const PurchasesService = require('./purchases-service')
 const xss = require('xss')
+const { requireAuth } = require('../middleware/jwt-auth')
 
 const purchasesRouter = express.Router()
 const jsonBodyParser = express.json()
@@ -23,15 +24,17 @@ purchasesRouter
             })
             .catch(next)
     })
-    .post(jsonBodyParser, (req, res, next) => {
-        const {date, amount, category, user_id, budget_id} = req.body
-        const newPurchase = {date, amount, category, user_id, budget_id}
+    .post(requireAuth, jsonBodyParser, (req, res, next) => {
+        const {date, amount, category, budget_id} = req.body
+        const newPurchase = {date, amount, category, budget_id}
 
         for(const [key, value] of Object.entries(newPurchase))
             if(value == null)
             return res.status(400).json({
                 error: `Missing '${key}' in request body`
             })
+        
+        newPurchase.user_id = req.user.id
         PurchasesService.insertPurchase(
             req.app.get('db'),
             newPurchase
@@ -45,7 +48,7 @@ purchasesRouter
         .catch(next)
     })
 purchasesRouter
-    .route('/:budget_id')
+    .route('/budget/:budget_id')
     .get((req, res, next) => {
         PurchasesService.getAllByBudgetId(req.app.get('db'), req.params.budget_id)
         .then(purchases => {

@@ -1,6 +1,7 @@
 const express = require('express')
 const BudgetsService = require('./budgets-service')
 const xss = require('xss')
+const { requireAuth } = require('../middleware/jwt-auth')
 
 const budgetsRouter = express.Router()
 const jsonBodyParser = express.json()
@@ -12,6 +13,7 @@ const serializeBudget = budget => ({
 
 budgetsRouter
     .route('/')
+    .all(requireAuth)
     .get((req, res, next) => {
         BudgetsService.getAllBudgets(req.app.get('db'))
             .then(budgets => {
@@ -40,11 +42,23 @@ budgetsRouter
     })
 
 budgetsRouter
-    .route('/:user_id')
+    .route('/user/:user_id')
+    .all(requireAuth)
     .get((req, res, next) => {
         BudgetsService.getByUserId(req.app.get('db'), req.params.user_id)
         .then(budgets => {
             res.json(budgets)
+        })
+        .catch(next)
+    })
+
+budgetsRouter
+    .route('/:budget_id')
+    .all(requireAuth)
+    .get((req, res, next) => {
+        BudgetsService.getByBudgetId(req.app.get('db'), req.params.budget_id)
+        .then(budget => {
+            res.json(budget)
         })
         .catch(next)
     })
