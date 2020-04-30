@@ -9,8 +9,8 @@ RESTART IDENTITY CASCADE;
 
 INSERT INTO justforfund_users (full_name, user_name, password)
 VALUES
-('John Sokolowski', 'jdsoko', 'Waffle96!'),
-('Demo User', 'demo-user', 'Pass123');
+('John Sokolowski', 'jdsoko', '$2a$12$9m/DO/wZhFGr7VaRMKsms.9GEuJme.Y8/Iun2ppprMXhuJHxHo8Ta'),
+('Demo User', 'demo-user', '$2a$12$Q8cdIzVl8mYuFm.wg/0JbO3ke46ifuMW4QqpagyoubBdy.Pqj3BPy');
 
 INSERT INTO justforfund_budgets (budget_name, budget_limit)
 VALUES

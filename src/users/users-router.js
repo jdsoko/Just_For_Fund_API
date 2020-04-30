@@ -33,21 +33,17 @@ usersRouter
                 if(hasUserWithUserName)
                 return res.status(400).json({ error: `Username already taken` })
 
-                /*return UsersService.hashPassword(password)
+                return UsersService.hashPassword(password)
                     .then(hashedPassword => {
                         const newUser = {
                             user_name,
                             password: hashedPassword,
                             full_name,
                         }
-                    */
+                    
                         return UsersService.insertUser(
                             req.app.get('db'),
-                            {
-                                user_name,
-                                password,
-                                full_name
-                            }
+                            newUser
                         )
                         .then(user => {
                             res
@@ -106,6 +102,8 @@ usersRouter
                             .status(201)
                             .json(permission)
                     })
+
+                })
                     
                 })
                 .catch(next)
@@ -113,5 +111,5 @@ usersRouter
                 
 
             })
-
+    
  module.exports = usersRouter   
