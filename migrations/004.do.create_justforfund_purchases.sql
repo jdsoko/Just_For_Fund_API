@@ -4,5 +4,5 @@ CREATE TABLE justforfund_purchases (
     amount NUMERIC(10, 2) NOT NULL,
     category TEXT NOT NULL,
     user_id INTEGER REFERENCES justforfund_users(id),
-    budget_id INTEGER REFERENCES justforfund_budgets(id)
+    budget_id INTEGER REFERENCES justforfund_budgets(id) ON DELETE SET NULL
 )

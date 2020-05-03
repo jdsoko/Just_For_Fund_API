@@ -7,9 +7,15 @@ const budgetsRouter = express.Router()
 const jsonBodyParser = express.json()
 
 const serializeBudget = budget => ({
+    id: budget.id,
     budget_name: xss(budget.budget_name),
-    budget_limit: xss(budget.budget_limit)
+    budget_limit: xss(budget.budget_limit),
+    purchase_total: budget.purchase_total || 0,
 })
+
+const serializeBudgets = budgets => {
+    return budgets.map(serializeBudget)
+}
 
 budgetsRouter
     .route('/')
@@ -17,7 +23,7 @@ budgetsRouter
     .get((req, res, next) => {
         BudgetsService.getAllBudgets(req.app.get('db'))
             .then(budgets => {
-                res.json(budgets)
+                res.json(serializeBudgets(budgets))
             })
             .catch(next)
     })
@@ -47,7 +53,7 @@ budgetsRouter
     .get((req, res, next) => {
         BudgetsService.getByUserId(req.app.get('db'), req.params.user_id)
         .then(budgets => {
-            res.json(budgets)
+            res.json(serializeBudgets(budgets))
         })
         .catch(next)
     })

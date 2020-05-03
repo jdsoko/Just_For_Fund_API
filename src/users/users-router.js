@@ -1,5 +1,6 @@
-express = require('express')
-UsersService = require('./users-service')
+const express = require('express')
+const UsersService = require('./users-service')
+const { requireAuth } = require('../middleware/jwt-auth')
 
 usersRouter = express.Router()
 jsonBodyParser = express.json()
@@ -54,6 +55,7 @@ usersRouter
                     })
                     .catch(next)
             })
+        })
 
         usersRouter
             .route('/permissions')
@@ -64,52 +66,81 @@ usersRouter
                     })
                     .catch(next)
             })
-            .post(jsonBodyParser, (req, res, next) => {
-                const {user_name, budget_id} = req.body
-                
-                for(const field of ['user_name', 'budget_id'])
+            .post(requireAuth, jsonBodyParser, (req, res, next) => {
+                const {budget_id} = req.body
+                const newPermission = {budget_id}
+                for(const field of ['budget_id'])
                 if(!req.body[field])
                 return res.status(400).json({
                     error: `Missing '${field}' in request body`
                 })
 
-                UsersService.hasUserWithUserName(
-                    req.app.get('db'),
-                    user_name
-                )
-                .then(hasUserWithUserName => {
-                    if(!hasUserWithUserName)
-                    return res.status(400).json({ error: `User '${user_name}' does not exist` })
-                    
-                })
+                newPermission.user_id = req.user.id
+
                 
-                UsersService.getUserIdWithUserName(
-                    req.app.get('db'),
-                    user_name
-                )
-                .then(user_id => {
-                    user_id = user_id.id
-                    
-                    return UsersService.insertNewPermission(
+                    UsersService.insertNewPermission(
                         req.app.get('db'),
-                        {
-                           user_id,
-                            budget_id
-                        }
+                        newPermission
                     )
                     .then(permission => {
                         res
                             .status(201)
                             .json(permission)
                     })
+                    .catch(next)
+                })
 
-                })
+        usersRouter
+                .route('/permissions/add')
+                .post(requireAuth, jsonBodyParser, (req, res, next) => {
+                    const {user_name, budget_id} = req.body
                     
-                })
-                .catch(next)
+                    for(const field of ['user_name', 'budget_id'])
+                    if(!req.body[field])
+                    return res.status(400).json({
+                        error: `Missing '${field}' in request body`
+                    })
+    
+                    UsersService.hasUserWithUserName(
+                        req.app.get('db'),
+                        user_name
+                    )
+                    .then(hasUserWithUserName => {
+                        if(!hasUserWithUserName)
+                        return res.status(400).json({ error: `User '${user_name}' does not exist` })
+                        
+                    })
+                    
+                    UsersService.getUserIdWithUserName(
+                        req.app.get('db'),
+                        user_name
+                    )
+                    .then(user_id => {
+                        user_id = user_id.id
+                        
+                        return UsersService.insertNewPermission(
+                            req.app.get('db'),
+                            {
+                               user_id,
+                                budget_id
+                            }
+                        )
+                        .then(permission => {
+                            res
+                                .status(201)
+                                .json(permission)
+                        })
+    
+                    })
+                    .catch(next)
+                    })
+                   
+                
+                
+               
 
                 
 
-            })
+            
     
  module.exports = usersRouter   

@@ -17,7 +17,7 @@ const serializePurchase = purchase => ({
 
 purchasesRouter
     .route('/')
-    .get((req, res, next) => {
+    .get(requireAuth, (req, res, next) => {
         PurchasesService.getAllPurchases(req.app.get('db'))
             .then(purchases => {
                 res.json(purchases)
@@ -49,10 +49,20 @@ purchasesRouter
     })
 purchasesRouter
     .route('/budget/:budget_id')
-    .get((req, res, next) => {
+    .get(requireAuth, (req, res, next) => {
         PurchasesService.getAllByBudgetId(req.app.get('db'), req.params.budget_id)
         .then(purchases => {
             res.json(purchases)
+        })
+        .catch(next)
+    })
+purchasesRouter
+    .route('/:purchase_id')
+    .all(requireAuth)
+    .get((req, res, next) => {
+        PurchasesService.getById(req.app.get('db'), req.params.purchase_id)
+        .then(purchase => {
+            res.json(purchase)
         })
         .catch(next)
     })
