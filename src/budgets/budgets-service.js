@@ -65,6 +65,12 @@ const BudgetsService = {
             .then(budget => 
                 BudgetsService.getByBudgetId(db, budget.id)
             )
+    },
+    deleteBudget(db, id){
+        return db
+        .from('justforfund_budgets as budget')
+        .where('budget.id', id)
+        .delete()
     }
 }
 

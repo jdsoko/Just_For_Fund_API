@@ -48,10 +48,11 @@ budgetsRouter
     })
 
 budgetsRouter
-    .route('/user/:user_id')
+    .route('/user/')
     .all(requireAuth)
     .get((req, res, next) => {
-        BudgetsService.getByUserId(req.app.get('db'), req.params.user_id)
+        const user_id = req.user.id
+        BudgetsService.getByUserId(req.app.get('db'), user_id)
         .then(budgets => {
             res.json(serializeBudgets(budgets))
         })
@@ -64,7 +65,22 @@ budgetsRouter
     .get((req, res, next) => {
         BudgetsService.getByBudgetId(req.app.get('db'), req.params.budget_id)
         .then(budget => {
+            if(!budget){
+                return res.status(404).json({
+                    error: { message: `Budget doesn't exist` }
+                })
+            }
             res.json(budget)
+        })
+        .catch(next)
+    })
+    .delete((req, res, next) => {
+        BudgetsService.deleteBudget(
+            req.app.get('db'),
+            req.params.budget_id
+        )
+        .then(numRowsAffected => {
+            res.status(204).end()
         })
         .catch(next)
     })
